@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Examens enregistrés</title>
+  <style>
+    .examen { border: 1px solid #ccc; margin: 10px 0; padding: 10px; }
+    .question { margin-left: 20px; color: #333; }
+    .proposition { margin-left: 40px; color: #666; }
+    .correct { color: green; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>Examens enregistrés</h1>
+  <input type="text" id="proprietaire" placeholder="Nom du propriétaire">
+  <button id="afficher">Afficher</button>
+  <div id="resultat"></div>
+
+  <script>
+    document.getElementById('afficher').addEventListener('click', () => {
+      // Lire le nom du propriétaire
+      const proprietaire = document.getElementById('proprietaire').value;
+
+      // Récupérer les examens depuis le localStorage
+      const key = 'examens_' + proprietaire;
+      const exams = JSON.parse(localStorage.getItem(key)) || [];
+
+      // Vider l'affichage précédent
+      const resultat = document.getElementById('resultat');
+      resultat.innerHTML = '';
+
+      // Cas où aucun examen n'est trouvé
+      if (exams.length === 0) {
+        resultat.innerHTML = '<p>Aucun examen trouvé pour ce propriétaire.</p>';
+        return;
+      }
+
+      // Afficher chaque examen et ses questions
+      exams.forEach((exam, i) => {
+        const divExam = document.createElement('div');
+        divExam.className = 'examen';
+        divExam.innerHTML = `<h2>${exam.nom}</h2>
+          <p><strong>Durée :</strong> ${exam.duree} min</p>
+          <p><strong>Description :</strong> ${exam.description}</p>`;
+
+        // Afficher les questions de l'examen
+        const ul = document.createElement('ul');
+        exam.questions.forEach(q => {
+          const li = document.createElement('li');
+          li.className = 'question';
+          li.innerHTML = `<strong>${q.enonce}</strong> (${q.points} pts, ${q.duree}s)`;
+
+          // Afficher les propositions
+          const ulProp = document.createElement('ul');
+          q.propositions.forEach(p => {
+            const liProp = document.createElement('li');
+            liProp.className = 'proposition';
+            liProp.textContent = p.texte;
+            if (p.correct) liProp.classList.add('correct');
+            ulProp.appendChild(liProp);
+          });
+
+          li.appendChild(ulProp);
+          ul.appendChild(li);
+        });
+
+        divExam.appendChild(ul);
+        resultat.appendChild(divExam);
+      });
+    });
+  </script>
+</body>
+</html>
